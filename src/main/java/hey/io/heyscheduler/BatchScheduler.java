@@ -18,25 +18,25 @@ public class BatchScheduler {
     @Value("${kopis.performance.batch-count}")
     private int performanceBatchCount;
 
-    @Scheduled(
-            cron = "0 0 0/3 * * *"
-    )
-    public void updatePerformances() {
-        this.kopisBatchService.updatePerformancesBatch(LocalDate.now().minusMonths(1L), LocalDate.now().plusMonths(5L), this.performanceBatchCount);
-    }
-
-    @Scheduled(
-            cron = "10 0 0 * * *"
-    )
-    public void updatePerformanceState() {
-        this.kopisBatchService.updatePerformanceStatusBatch();
-    }
-
-    @Scheduled(
-            cron = "0 0 0 * * *"
-    )
-    public void sendPerformancesNotification() throws FirebaseMessagingException {
-        this.kopisBatchService.sendPerformancesNotification();
-    }
+//    @Scheduled(
+//            cron = "0 0 0/3 * * *"
+//    )
+//    public void updatePerformances() {
+//        this.kopisBatchService.updatePerformancesBatch(LocalDate.now().minusMonths(1L), LocalDate.now().plusMonths(5L), this.performanceBatchCount);
+//    }
+//
+//    @Scheduled(
+//            cron = "10 0 0 * * *"
+//    )
+//    public void updatePerformanceState() {
+//        this.kopisBatchService.updatePerformanceStatusBatch();
+//    }
+//
+//    @Scheduled(
+//            cron = "0 0 0 * * *"
+//    )
+//    public void sendPerformancesNotification() throws FirebaseMessagingException {
+//        this.kopisBatchService.sendPerformancesNotification();
+//    }
 
 }
