@@ -1,7 +1,5 @@
 package hey.io.heyscheduler.common.response;
 
-import java.util.Objects;
-
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

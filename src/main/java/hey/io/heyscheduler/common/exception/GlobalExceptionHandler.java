@@ -4,6 +4,7 @@ package hey.io.heyscheduler.common.exception;
 
 import hey.io.heyscheduler.common.response.ErrorResponse;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +25,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 @ControllerAdvice
 @RestController
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
+
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     public GlobalExceptionHandler() {
@@ -48,13 +50,22 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return this.handleExceptionInternal(errorCode, e.getMessage());
     }
 
-    public ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException e, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
-        log.warn("handleIllegalArgument", e);
-        ErrorCode errorCode = ErrorCode.INVALID_INPUT_VALUE;
-        return this.handleExceptionInternal((BindException)e, (ErrorCode)errorCode);
+    @ExceptionHandler({NoSuchElementException.class})
+    public ResponseEntity<Object> handleNoSuchElement(NoSuchElementException e) {
+        log.warn("handleNoSuchElement", e);
+        ErrorCode errorCode = ErrorCode.ENTITY_NOT_FOUND;
+        return this.handleExceptionInternal(errorCode, e.getMessage());
     }
 
-    public ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException e, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+    public ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException e, HttpHeaders headers,
+        HttpStatusCode status, WebRequest request) {
+        log.warn("handleIllegalArgument", e);
+        ErrorCode errorCode = ErrorCode.INVALID_INPUT_VALUE;
+        return this.handleExceptionInternal(e, errorCode);
+    }
+
+    public ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException e, HttpHeaders headers,
+        HttpStatusCode status, WebRequest request) {
         log.warn("handleHttpMessageNotReadable", e);
         return this.handleExceptionInternal(ErrorCode.INVALID_INPUT_VALUE);
     }
@@ -93,7 +104,9 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     private ErrorResponse makeErrorResponse(BindException e, ErrorCode errorCode) {
-        List<ErrorResponse.ValidationError> validationErrorList = (List)e.getBindingResult().getFieldErrors().stream().map(ErrorResponse.ValidationError::of).collect(Collectors.toList());
-        return ErrorResponse.builder().code(errorCode.getCode()).message(errorCode.getMessage()).errors(validationErrorList).build();
+        List<ErrorResponse.ValidationError> validationErrorList = e.getBindingResult().getFieldErrors().stream()
+            .map(ErrorResponse.ValidationError::of).collect(Collectors.toList());
+        return ErrorResponse.builder().code(errorCode.getCode()).message(errorCode.getMessage())
+            .errors(validationErrorList).build();
     }
 }

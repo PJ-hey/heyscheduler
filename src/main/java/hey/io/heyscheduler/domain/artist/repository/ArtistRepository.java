@@ -1,14 +1,15 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package hey.io.heyscheduler.domain.artist.repository;
 
-import hey.io.heyscheduler.domain.artist.domain.ArtistEntity;
+import hey.io.heyscheduler.domain.artist.entity.Artist;
+import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface ArtistRepository extends JpaRepository<ArtistEntity, String>, ArtistQueryRepository {
+public interface ArtistRepository extends JpaRepository<Artist, Long> {
+
+    Optional<Artist> findFirstByName(String orgName);
+
+    List<Artist> findByArtistUidIn(List<String> artistUids);
 }
