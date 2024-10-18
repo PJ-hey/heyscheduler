@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package hey.io.heyscheduler.fcm.dto;
 
 import lombok.AccessLevel;

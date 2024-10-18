@@ -6,20 +6,19 @@ import jakarta.persistence.MappedSuperclass;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import lombok.Getter;
-import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @EntityListeners(AuditingEntityListener.class)
 @MappedSuperclass
 @Getter
-public abstract class BaseEntity extends BaseTimeEntity {
+public abstract class BaseTimeEntity {
 
-    @CreatedBy
+    @CreatedDate
     @Column(updatable = false)
-    private int createdBy; // 등록자
+    private LocalDateTime createdAt; // 등록 일시
 
-    @LastModifiedBy
-    private int modifiedBy; // 수정자
+    @LastModifiedDate
+    private LocalDateTime modifiedAt; // 수정 일시
 }

@@ -17,9 +17,10 @@ import org.springframework.http.converter.cbor.MappingJackson2CborHttpMessageCon
 
 @Configuration
 @EnableFeignClients(
-        basePackages = {"hey.io.heyscheduler"}
+    basePackages = {"hey.io.heyscheduler"}
 )
 public class FeignConfig {
+
     private final ObjectFactory<HttpMessageConverters> messageConverters;
 
     public FeignConfig(final ObjectFactory<HttpMessageConverters> messageConverters) {
@@ -39,10 +40,8 @@ public class FeignConfig {
     @Bean
     public Decoder feignDecoder() {
         MappingJackson2CborHttpMessageConverter cborConverter = new MappingJackson2CborHttpMessageConverter();
-        HttpMessageConverters converters = new HttpMessageConverters(new HttpMessageConverter[]{cborConverter});
-        ObjectFactory<HttpMessageConverters> objectFactory = () -> {
-            return converters;
-        };
+        HttpMessageConverters converters = new HttpMessageConverters(cborConverter);
+        ObjectFactory<HttpMessageConverters> objectFactory = () -> converters;
         return new ResponseEntityDecoder(new SpringDecoder(objectFactory));
     }
 }
