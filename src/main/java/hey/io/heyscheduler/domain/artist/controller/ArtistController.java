@@ -2,9 +2,17 @@ package hey.io.heyscheduler.domain.artist.controller;
 
 import hey.io.heyscheduler.client.spotify.SpotifyService;
 import hey.io.heyscheduler.client.spotify.dto.SpotifyArtistResponse;
+import hey.io.heyscheduler.common.response.ErrorResponse;
 import hey.io.heyscheduler.common.response.SuccessResponse;
 import hey.io.heyscheduler.domain.artist.dto.ArtistResponse;
 import hey.io.heyscheduler.domain.artist.service.ArtistService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,8 +27,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@SecurityRequirement(name = "Bearer Authentication")
 @RequiredArgsConstructor
 @Slf4j
+@Tag(name = "2. Artist", description = "아티스트 관련 API")
 public class ArtistController {
 
     private final ArtistService artistService;
@@ -32,7 +42,13 @@ public class ArtistController {
      * @param name 아티스트명
      * @return 조회한 아티스트 목록
      */
-    @GetMapping("/spotify/artists")
+    @GetMapping("/artists/spotify")
+    @Operation(summary = "Spotify 아티스트 목록", description = "Spotify API를 통해 아티스트 정보를 조회합니다.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "ok"),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(responseCode = "403", description = "Forbidden", content = @Content(schema = @Schema(hidden = true)))
+    })
     public ResponseEntity<SuccessResponse<List<SpotifyArtistResponse>>> searchSpotifyArtists(@RequestParam String name) {
         return SuccessResponse.of(spotifyService.searchArtists(name)).asHttp(HttpStatus.OK);
     }
@@ -44,6 +60,7 @@ public class ArtistController {
      * @return 수정한 아티스트 정보 목록
      */
     @PutMapping("/artists")
+    @Operation(summary = "아티스트 정보 일괄 수정", description = "Spotify에서 ID로 아티스트 정보를 조회 후 DB로 동기화합니다.")
     public ResponseEntity<SuccessResponse<Map<String, Object>>> modifyArtists(@RequestBody String[] artistUids) {
         List<ArtistResponse> artistResponses = artistService.modifyArtists(artistUids);
 

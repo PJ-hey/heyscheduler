@@ -6,6 +6,8 @@ import hey.io.heyscheduler.domain.file.entity.File;
 import hey.io.heyscheduler.domain.file.enums.EntityType;
 import hey.io.heyscheduler.domain.file.enums.FileCategory;
 import hey.io.heyscheduler.domain.file.enums.FileType;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.Arrays;
 import java.util.List;
 import lombok.Builder;
@@ -13,20 +15,39 @@ import lombok.Getter;
 import se.michaelthelin.spotify.model_objects.specification.Artist;
 import se.michaelthelin.spotify.model_objects.specification.Image;
 
-public record SpotifyArtistResponse (
-    String id, // Spotify 아티스트 ID
-    String name, // 아티스트명
-    String[] genres, // 아티스트 장르
-    String externalUrl, // Spotify 아티스트 URL
+@Schema(description = "Spotify 아티스트 목록")
+public record SpotifyArtistResponse(
+
+    @Schema(description = "Spotify 아티스트 ID", example = "0qr7Rhj0yU7BPySYecNUlm")
+    String id,
+
+    @Schema(description = "Spotify 아티스트명", example = "권은비")
+    String name,
+
+    @Schema(description = "Spotify 아티스트 장르", nullable = true, example = "[\"k-pop\", \"dance rock\"]")
+    String[] genres,
+
+    @Schema(description = "Spotify 아티스트 URL", example = "https://open.spotify.com/artist/0qr7Rhj0yU7BPySYecNUlm")
+    String externalUrl,
+
+    @Schema(description = "Spotify 아티스트 이미지", nullable = true)
     List<ArtistImage> artistImages, // 아티스트 이미지
-    Integer popularity // 인기도
+
+    @Schema(description = "Spotify 아티스트 인기도", example = "48")
+    Integer popularity
 ) {
 
     @Getter
     @Builder
     private static class ArtistImage {
-        private String url; // 이미지 URL
+
+        @Schema(description = "Spotify 아티스트 이미지 URL", nullable = true, example = "https://i.scdn.co/image/ab6761610000e5ebbbaf965d883863da863e60f8")
+        private String url;
+
+        @Schema(description = "Spotify 아티스트 이미지 너비", nullable = true, example = "640")
         private Integer width; // 이미지 너비
+
+        @Schema(description = "Spotify 아티스트 이미지 높이", nullable = true, example = "640")
         private Integer height; // 이미지 높이
 
         private static ArtistImage of(Image image) {

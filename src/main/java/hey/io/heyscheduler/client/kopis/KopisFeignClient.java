@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 @FeignClient(
     name = "kopisFeignClient",
-    url = "${kopis.performance.url:url}",
+    url = "${client.kopis.url:url}",
     configuration = {FeignConfig.class}
 )
 public interface KopisFeignClient {
