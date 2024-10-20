@@ -22,10 +22,10 @@ import se.michaelthelin.spotify.requests.authorization.client_credentials.Client
 @Slf4j
 public class SpotifyService {
 
-    @Value("${spotify.client-id}")
+    @Value("${client.spotify.client-id}")
     private String clientId; // Spotify Client ID
 
-    @Value("${spotify.client-secret}")
+    @Value("${client.spotify.client-secret}")
     private String clientSecret; // Spotify Client Secret
 
     private SpotifyApi spotifyApi;

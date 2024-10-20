@@ -49,7 +49,7 @@ public class PerformanceService {
     private final FileRepository fileRepository;
     private final KopisFeignClient kopisFeignClient;
 
-    @Value("${kopis.api.key}")
+    @Value("${client.kopis.api-key}")
     private String apiKey; // KOPIS API key
 
     @Value("${spring.task.execution.pool.core-size}")

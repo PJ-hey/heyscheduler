@@ -21,6 +21,21 @@ spring:
   main:
     allow-bean-definition-overriding: true
 
+springdoc:
+  default-produces-media-type: application/json
+  writer-with-default-pretty-printer: true
+  model-and-view-allowed: true
+  swagger-ui:
+    syntax-highlight:
+      theme: tomorrow-night
+    tags-sorter: alpha
+    operations-sorter: method
+
+jwt:
+  secret: ${JWT_SECRET}
+#  access-token-expire-time: 3600000
+#  refresh-token-expire-time: 5184000000
+
 logging:
   level:
     org.springframework.cache: DEBUG
@@ -30,16 +45,13 @@ management:
     web:
       base-path: /health_check
 
-kopis:
-  performance:
-    batch-count: 200
+client:
+  kopis:
+    api-key: ${KOPIS_API_KEY}
     url: http://www.kopis.or.kr/openApi/restful
-  api:
-    key: ${KOPIS_API_KEY}
-
-spotify:
-  client-id: ${SPOTIFY_CLIENT_ID}
-  client-secret: ${SPOTIFY_CLIENT_SECRET}
+  spotify:
+    client-id: ${SPOTIFY_CLIENT_ID}
+    client-secret: ${SPOTIFY_CLIENT_SECRET}
 
 fcm:
   service-account-file: key/heyapplication-40e61-firebase-adminsdk-cd5mk-6b4dd26836.json
