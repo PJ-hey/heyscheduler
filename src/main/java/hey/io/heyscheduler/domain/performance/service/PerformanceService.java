@@ -322,14 +322,14 @@ public class PerformanceService {
      */
     private Artist insertArtist(String artistName) {
         // 아티스트 정보 확인
-        Optional<Artist> existingArtist = artistRepository.findFirstByName(artistName);
+        Optional<Artist> existingArtist = artistRepository.findFirstByOrgName(artistName);
         if (existingArtist.isPresent()) {
             return existingArtist.get();
         }
 
         synchronized (this) {
             // 동기화 스레드 내에서 아티스트 정보 확인
-            return artistRepository.findFirstByName(artistName)
+            return artistRepository.findFirstByOrgName(artistName)
                 .orElseGet(() -> {
                     // 아티스트가 없으면 새로 생성하여 저장
                     Artist newArtist = Artist.builder()

@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ArtistRepository extends JpaRepository<Artist, Long> {
 
-    Optional<Artist> findFirstByName(String orgName);
+    Optional<Artist> findFirstByOrgName(String orgName);
 
     List<Artist> findByArtistUidIn(List<String> artistUids);
 }
