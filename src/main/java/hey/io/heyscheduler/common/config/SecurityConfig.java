@@ -38,6 +38,8 @@ public class SecurityConfig {
         http.authorizeHttpRequests(authorize -> authorize
             .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/health_check").permitAll() // Swagger 경로 허용
             .requestMatchers("/artists/spotify").permitAll() // Spotify 아티스트 목록 조회 기능 허용
+//            .requestMatchers("/performances").permitAll()
+//            .requestMatchers("/artists").permitAll()
             .anyRequest().authenticated() // 그 외 요청은 인증 필요
         );
 

@@ -1,9 +1,10 @@
 package hey.io.heyscheduler.domain.performance.controller;
 
+import hey.io.heyscheduler.common.config.swagger.ApiErrorCodes;
+import hey.io.heyscheduler.common.exception.ErrorCode;
 import hey.io.heyscheduler.common.response.SuccessResponse;
 import hey.io.heyscheduler.domain.performance.dto.PerformanceResponse;
 import hey.io.heyscheduler.domain.performance.dto.PerformanceSearch;
-import hey.io.heyscheduler.domain.performance.entity.Performance;
 import hey.io.heyscheduler.domain.performance.service.PerformanceService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -35,6 +36,7 @@ public class PerformanceController {
      * @return 등록한 공연 목록
      */
     @Operation(summary = "공연 등록", description = "KOPIS 공연 데이터를 조회 후 등록합니다.")
+    @ApiErrorCodes({ErrorCode.PERFORMANCE_NOT_FOUND, ErrorCode.PLACE_NOT_FOUND})
     @PostMapping("/performances")
     public ResponseEntity<SuccessResponse<Map<String, Object>>> createPerformances(
         @RequestBody PerformanceSearch searchDto) {
