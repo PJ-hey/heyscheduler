@@ -7,6 +7,7 @@ import hey.io.heyscheduler.client.kopis.dto.KopisPerformanceResponse.Relate;
 import hey.io.heyscheduler.client.kopis.dto.KopisPlaceResponse;
 import hey.io.heyscheduler.domain.artist.entity.Artist;
 import hey.io.heyscheduler.domain.artist.enums.ArtistStatus;
+import hey.io.heyscheduler.domain.artist.enums.ArtistType;
 import hey.io.heyscheduler.domain.artist.repository.ArtistRepository;
 import hey.io.heyscheduler.domain.file.entity.File;
 import hey.io.heyscheduler.domain.file.enums.EntityType;
@@ -335,6 +336,7 @@ public class PerformanceService {
                     Artist newArtist = Artist.builder()
                         .name(artistName)
                         .orgName(artistName)
+                        .artistType(ArtistType.SOLO)
                         .artistStatus(ArtistStatus.INIT)
                         .build();
 

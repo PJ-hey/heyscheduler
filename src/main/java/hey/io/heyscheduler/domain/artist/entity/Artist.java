@@ -3,6 +3,7 @@ package hey.io.heyscheduler.domain.artist.entity;
 import hey.io.heyscheduler.common.entity.BaseTimeEntity;
 import hey.io.heyscheduler.domain.artist.dto.ArtistRequest;
 import hey.io.heyscheduler.domain.artist.enums.ArtistStatus;
+import hey.io.heyscheduler.domain.artist.enums.ArtistType;
 import hey.io.heyscheduler.domain.file.entity.File;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -37,6 +38,10 @@ public class Artist extends BaseTimeEntity {
 
     private String orgName; // 아티스트 본명
 
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private ArtistType artistType; // 아티스트 유형
+
     private String artistUid; // Spotify 아티스트 ID
 
     private String artistUrl; // 아티스트 URL
@@ -51,11 +56,12 @@ public class Artist extends BaseTimeEntity {
     private List<File> files = new ArrayList<>();
 
     @Builder
-    public Artist(String name, String engName, String orgName, String artistUid, String artistUrl, Integer popularity,
-        ArtistStatus artistStatus, List<File> artistFiles) {
+    public Artist(String name, String engName, String orgName, ArtistType artistType, String artistUid,
+        String artistUrl, Integer popularity, ArtistStatus artistStatus, List<File> artistFiles) {
         this.name = name;
         this.engName = engName;
         this.orgName = orgName;
+        this.artistType = artistType;
         this.artistUid = artistUid;
         this.artistUrl = artistUrl;
         this.popularity = popularity;
