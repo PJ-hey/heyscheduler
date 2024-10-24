@@ -3,7 +3,6 @@ package hey.io.heyscheduler.domain.performance.controller;
 import hey.io.heyscheduler.common.response.SuccessResponse;
 import hey.io.heyscheduler.domain.performance.dto.PerformanceResponse;
 import hey.io.heyscheduler.domain.performance.dto.PerformanceSearch;
-import hey.io.heyscheduler.domain.performance.entity.Performance;
 import hey.io.heyscheduler.domain.performance.service.PerformanceService;
 import java.util.HashMap;
 import java.util.List;
