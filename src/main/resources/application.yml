@@ -36,10 +36,6 @@ jwt:
 #  access-token-expire-time: 3600000
 #  refresh-token-expire-time: 5184000000
 
-logging:
-  level:
-    org.springframework.cache: DEBUG
-
 management:
   endpoints:
     web:

@@ -2,6 +2,9 @@ package hey.io.heyscheduler.domain.artist.service;
 
 import hey.io.heyscheduler.client.spotify.SpotifyService;
 import hey.io.heyscheduler.client.spotify.dto.SpotifyArtistResponse;
+import hey.io.heyscheduler.common.exception.ErrorCode;
+import hey.io.heyscheduler.common.exception.badrequest.InvalidParameterException;
+import hey.io.heyscheduler.common.exception.notfound.EntityNotFoundException;
 import hey.io.heyscheduler.domain.artist.dto.ArtistRequest;
 import hey.io.heyscheduler.domain.artist.dto.ArtistResponse;
 import hey.io.heyscheduler.domain.artist.entity.Artist;
@@ -9,7 +12,6 @@ import hey.io.heyscheduler.domain.artist.repository.ArtistRepository;
 import hey.io.heyscheduler.domain.file.entity.File;
 import hey.io.heyscheduler.domain.file.repository.FileRepository;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,14 +39,14 @@ public class ArtistService {
     @Transactional
     public List<ArtistResponse> modifyArtists(String[] artistUids) {
         if (artistUids.length == 0) {
-            throw new IllegalArgumentException("Artist id must not be blank");
+            throw new InvalidParameterException(ErrorCode.INVALID_ARTIST_ID);
         }
 
         // 1. Spotify 아티스트 목록 조회
         List<SpotifyArtistResponse> spotifyArtistList = Optional.ofNullable(
                 spotifyService.getArtists(artistUids))
             .filter(list -> !list.isEmpty())
-            .orElseThrow(() -> new NoSuchElementException("No artists found"));
+            .orElseThrow(() -> new EntityNotFoundException(ErrorCode.ARTIST_NOT_FOUND));
 
         // 2. 아티스트 엔티티 설정
         List<Artist> artistList = setArtists(spotifyArtistList);
@@ -86,7 +88,7 @@ public class ArtistService {
         return spotifyArtistList.stream()
             .filter(spotifyArtist -> spotifyArtist.id().equals(artist.getArtistUid()))
             .findFirst()
-            .orElseThrow(() -> new NoSuchElementException("Artist not found for UID: " + artist.getArtistUid()))
+            .orElseThrow(() -> new EntityNotFoundException(ErrorCode.ARTIST_NOT_FOUND, "id: " + artist.getArtistUid()))
             .toRequest();
     }
 
@@ -118,7 +120,7 @@ public class ArtistService {
         return artistList.stream()
             .filter(artist -> artist.getArtistUid().equals(id))
             .findFirst()
-            .orElseThrow(() -> new NoSuchElementException("Artist not found for UID: " + id))
+            .orElseThrow(() -> new EntityNotFoundException(ErrorCode.ARTIST_NOT_FOUND, "id: " + id))
             .getArtistId();
     }
 

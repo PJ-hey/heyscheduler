@@ -1,6 +1,9 @@
 package hey.io.heyscheduler.client.spotify;
 
 import hey.io.heyscheduler.client.spotify.dto.SpotifyArtistResponse;
+import hey.io.heyscheduler.common.exception.ErrorCode;
+import hey.io.heyscheduler.common.exception.badrequest.InvalidParameterException;
+import hey.io.heyscheduler.common.exception.notfound.EntityNotFoundException;
 import jakarta.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -80,9 +83,6 @@ public class SpotifyService {
      */
     public List<SpotifyArtistResponse> searchArtists(String name) {
         List<SpotifyArtistResponse> artists = new ArrayList<>();
-        if (StringUtils.isBlank(name)) {
-            throw new IllegalArgumentException("Artist name must not be blank");
-        }
 
         try {
             checkAccessToken();
@@ -90,7 +90,7 @@ public class SpotifyService {
             Artist[] spotifyArtistList = Optional.ofNullable(
                     spotifyApi.searchArtists(name).build().execute().getItems())
                 .filter(list -> list.length > 0)
-                .orElseThrow(() -> new SpotifyWebApiException("No artists found"));
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.ARTIST_NOT_FOUND));
 
             artists = Arrays.stream(spotifyArtistList)
                 .map(SpotifyArtistResponse::of)
@@ -134,16 +134,21 @@ public class SpotifyService {
     public List<SpotifyArtistResponse> getArtists(String[] ids) {
         List<SpotifyArtistResponse> artists = new ArrayList<>();
         if (ids.length == 0) {
-            throw new IllegalArgumentException("Artist ids must not be blank");
+            throw new InvalidParameterException(ErrorCode.INVALID_ARTIST_ID);
         }
         if (ids.length > 50) {
-            throw new IllegalArgumentException("The number of Artist ids must be less than 50");
+            throw new InvalidParameterException(ErrorCode.TOO_MANY_ARTIST_ID);
         }
 
         try {
             checkAccessToken();
 
-            artists = Arrays.stream(spotifyApi.getSeveralArtists(ids).build().execute())
+            Artist[] spotifyArtistList = Optional.ofNullable(
+                    spotifyApi.getSeveralArtists(ids).build().execute())
+                .filter(list -> list.length > 0)
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.ARTIST_NOT_FOUND));
+
+            artists = Arrays.stream(spotifyArtistList)
                 .map(SpotifyArtistResponse::of)
                 .toList();
         } catch (IOException | SpotifyWebApiException | ParseException e) {

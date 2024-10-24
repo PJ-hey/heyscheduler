@@ -5,6 +5,8 @@ import hey.io.heyscheduler.client.kopis.dto.KopisPerformanceRequest;
 import hey.io.heyscheduler.client.kopis.dto.KopisPerformanceResponse;
 import hey.io.heyscheduler.client.kopis.dto.KopisPerformanceResponse.Relate;
 import hey.io.heyscheduler.client.kopis.dto.KopisPlaceResponse;
+import hey.io.heyscheduler.common.exception.ErrorCode;
+import hey.io.heyscheduler.common.exception.notfound.EntityNotFoundException;
 import hey.io.heyscheduler.domain.artist.entity.Artist;
 import hey.io.heyscheduler.domain.artist.enums.ArtistStatus;
 import hey.io.heyscheduler.domain.artist.enums.ArtistType;
@@ -137,7 +139,7 @@ public class PerformanceService {
         KopisPerformanceResponse kopisPerformance = Optional.ofNullable(
                 kopisFeignClient.getPerformance(performanceUid, apiKey).getFirst())
             .filter(response -> response.mt20id() != null)
-            .orElseThrow(() -> new IllegalStateException("No performance found"));
+            .orElseThrow(() -> new EntityNotFoundException(ErrorCode.PERFORMANCE_NOT_FOUND));
 
         // 2. 장소 조회 및 등록
         Place place = createPlace(kopisPerformance.mt10id());
@@ -178,7 +180,7 @@ public class PerformanceService {
                     // 장소 상세 조회
                     KopisPlaceResponse kopisPlace = Optional.ofNullable(
                             kopisFeignClient.getPlaces(placeUid, apiKey).getFirst())
-                        .orElseThrow(() -> new IllegalStateException("No place found"));
+                        .orElseThrow(() -> new EntityNotFoundException(ErrorCode.PLACE_NOT_FOUND));
 
                     // 장소 등록
                     Place place = kopisPlace.toPlace();

@@ -2,17 +2,15 @@ package hey.io.heyscheduler.domain.artist.controller;
 
 import hey.io.heyscheduler.client.spotify.SpotifyService;
 import hey.io.heyscheduler.client.spotify.dto.SpotifyArtistResponse;
-import hey.io.heyscheduler.common.response.ErrorResponse;
+import hey.io.heyscheduler.common.config.swagger.ApiErrorCodes;
+import hey.io.heyscheduler.common.exception.ErrorCode;
 import hey.io.heyscheduler.common.response.SuccessResponse;
 import hey.io.heyscheduler.domain.artist.dto.ArtistResponse;
 import hey.io.heyscheduler.domain.artist.service.ArtistService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.NotBlank;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,14 +40,11 @@ public class ArtistController {
      * @param name 아티스트명
      * @return 조회한 아티스트 목록
      */
-    @GetMapping("/artists/spotify")
     @Operation(summary = "Spotify 아티스트 목록", description = "Spotify API를 통해 아티스트 정보를 조회합니다.")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "ok"),
-        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-        @ApiResponse(responseCode = "403", description = "Forbidden", content = @Content(schema = @Schema(hidden = true)))
-    })
-    public ResponseEntity<SuccessResponse<List<SpotifyArtistResponse>>> searchSpotifyArtists(@RequestParam String name) {
+    @ApiErrorCodes({ErrorCode.INVALID_INPUT_VALUE, ErrorCode.ARTIST_NOT_FOUND})
+    @GetMapping("/artists/spotify")
+    public ResponseEntity<SuccessResponse<List<SpotifyArtistResponse>>> searchSpotifyArtists(
+        @RequestParam @NotBlank(message = "아티스트명을 입력해 주세요.") String name) {
         return SuccessResponse.of(spotifyService.searchArtists(name)).asHttp(HttpStatus.OK);
     }
 
@@ -59,8 +54,9 @@ public class ArtistController {
      * @param artistUids Spotify 아티스트 ID 목록
      * @return 수정한 아티스트 정보 목록
      */
-    @PutMapping("/artists")
     @Operation(summary = "아티스트 정보 일괄 수정", description = "Spotify에서 ID로 아티스트 정보를 조회 후 DB로 동기화합니다.")
+    @ApiErrorCodes({ErrorCode.INVALID_ARTIST_ID, ErrorCode.TOO_MANY_ARTIST_ID, ErrorCode.ARTIST_NOT_FOUND})
+    @PutMapping("/artists")
     public ResponseEntity<SuccessResponse<Map<String, Object>>> modifyArtists(@RequestBody String[] artistUids) {
         List<ArtistResponse> artistResponses = artistService.modifyArtists(artistUids);
 
