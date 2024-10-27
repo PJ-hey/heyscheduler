@@ -4,7 +4,7 @@ import hey.io.heyscheduler.client.spotify.SpotifyService;
 import hey.io.heyscheduler.client.spotify.dto.SpotifyArtistResponse;
 import hey.io.heyscheduler.common.config.swagger.ApiErrorCodes;
 import hey.io.heyscheduler.common.exception.ErrorCode;
-import hey.io.heyscheduler.common.response.SuccessResponse;
+import hey.io.heyscheduler.common.response.ApiResponse;
 import hey.io.heyscheduler.domain.artist.dto.ArtistResponse;
 import hey.io.heyscheduler.domain.artist.service.ArtistService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -43,9 +43,9 @@ public class ArtistController {
     @Operation(summary = "Spotify 아티스트 목록", description = "Spotify API를 통해 아티스트 정보를 조회합니다.")
     @ApiErrorCodes({ErrorCode.INVALID_INPUT_VALUE, ErrorCode.ARTIST_NOT_FOUND})
     @GetMapping("/artists/spotify")
-    public ResponseEntity<SuccessResponse<List<SpotifyArtistResponse>>> searchSpotifyArtists(
+    public ApiResponse<List<SpotifyArtistResponse>> searchSpotifyArtists(
         @RequestParam @NotBlank(message = "아티스트명을 입력해 주세요.") String name) {
-        return SuccessResponse.of(spotifyService.searchArtists(name)).asHttp(HttpStatus.OK);
+        return ApiResponse.success(spotifyService.searchArtists(name));
     }
 
     /**
@@ -57,14 +57,7 @@ public class ArtistController {
     @Operation(summary = "아티스트 정보 일괄 수정", description = "Spotify에서 ID로 아티스트 정보를 조회 후 DB로 동기화합니다.")
     @ApiErrorCodes({ErrorCode.INVALID_ARTIST_ID, ErrorCode.TOO_MANY_ARTIST_ID, ErrorCode.ARTIST_NOT_FOUND})
     @PutMapping("/artists")
-    public ResponseEntity<SuccessResponse<Map<String, Object>>> modifyArtists(@RequestBody String[] artistUids) {
-        List<ArtistResponse> artistResponses = artistService.modifyArtists(artistUids);
-
-        // 응답에 포함할 데이터 (artistResponses 총 Insert 개수)
-        Map<String, Object> responseData = new HashMap<>();
-        responseData.put("artists", artistResponses);
-        responseData.put("insertedCount", artistResponses.size());
-
-        return SuccessResponse.of(responseData).asHttp(HttpStatus.CREATED);
+    public ApiResponse<ArtistResponse> modifyArtists(@RequestBody String[] artistUids) {
+        return ApiResponse.success(artistService.modifyArtists(artistUids));
     }
 }

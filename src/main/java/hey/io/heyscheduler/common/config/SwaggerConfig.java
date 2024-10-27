@@ -4,7 +4,6 @@ import hey.io.heyscheduler.common.config.swagger.ApiErrorCode;
 import hey.io.heyscheduler.common.config.swagger.ApiErrorCodes;
 import hey.io.heyscheduler.common.config.swagger.ExampleHolder;
 import hey.io.heyscheduler.common.exception.ErrorCode;
-import hey.io.heyscheduler.common.response.ErrorResponse;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
@@ -21,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springdoc.core.customizers.OperationCustomizer;
 import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.context.annotation.Bean;
@@ -127,15 +125,14 @@ public class SwaggerConfig {
     }
 
     /**
-     * <p>ErrorResponseDto 형태의 예시 객체 생성</p>
+     * <p>커스텀 ApiResponse 형태의 예시 객체 생성</p>
      *
      * @param errorCode 에러 코드 정보
      * @return API Operation Example 클래스
      */
     private Example getSwaggerExample(ErrorCode errorCode) {
-        ErrorResponse errorResponseDto = ErrorResponse.of(errorCode);
         Example example = new Example();
-        example.setValue(errorResponseDto);
+        example.setValue(hey.io.heyscheduler.common.response.ApiResponse.failure(errorCode));
 
         return example;
     }

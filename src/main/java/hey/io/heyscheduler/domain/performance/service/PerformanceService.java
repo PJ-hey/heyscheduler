@@ -65,8 +65,7 @@ public class PerformanceService {
      * @return 등록한 공연 목록
      */
     @Transactional
-    public List<PerformanceResponse> createPerformances(PerformanceSearch searchDto) {
-        List<PerformanceResponse> performanceList = new ArrayList<>();
+    public PerformanceResponse createPerformances(PerformanceSearch searchDto) {
         ExecutorService executorService = Executors.newFixedThreadPool(poolCoreSize);
         KopisPerformanceRequest request = KopisPerformanceRequest.of(searchDto.getStartDate(), searchDto.getEndDate(),
             searchDto.getName());
@@ -88,13 +87,7 @@ public class PerformanceService {
         executorService.shutdown();
 
         // 4. 공연 정보 등록
-        if (!searchPerformanceList.isEmpty()) {
-            performanceList = insertPerformances(searchPerformanceList);
-        } else {
-            log.info("No new performances to insert.");
-        }
-
-        return performanceList;
+        return insertPerformances(searchPerformanceList);
     }
 
     private boolean checkExistPerformance(KopisPerformanceResponse response) {
@@ -106,24 +99,27 @@ public class PerformanceService {
         return !exists;
     }
 
-    private List<PerformanceResponse> insertPerformances(List<Performance> performanceList) {
-        // 공연 정보 등록
-        List<Performance> resultList = performanceRepository.saveAll(performanceList);
+    private PerformanceResponse insertPerformances(List<Performance> performanceList) {
+        if (!performanceList.isEmpty()) {
+            // 공연 정보 등록
+            List<Performance> resultList = performanceRepository.saveAll(performanceList);
 
-        // 공연 이미지 등록
-        resultList.forEach(performance -> {
-            List<File> files = performance.getFiles();
+            // 공연 이미지 등록
+            resultList.forEach(performance -> {
+                List<File> files = performance.getFiles();
 
-            if (!files.isEmpty()) {
-                files.forEach(file -> file.updatePerformanceFile(performance));
-                fileRepository.saveAll(files);
-            }
-        });
+                if (!files.isEmpty()) {
+                    files.forEach(file -> file.updatePerformanceFile(performance));
+                    fileRepository.saveAll(files);
+                }
+            });
 
-        log.info("Inserted {} new performances.", performanceList.size());
-        return resultList.stream()
-            .map(PerformanceResponse::of)
-            .toList();
+            log.info("Inserted {} new performances.", performanceList.size());
+        } else {
+            log.info("No new performances to insert.");
+        }
+
+        return PerformanceResponse.of(performanceList);
     }
 
     /**
@@ -251,7 +247,7 @@ public class PerformanceService {
     /**
      * <p>공연 이미지 설정</p>
      *
-     * @param poster 포스터 이미지 경로
+     * @param poster  포스터 이미지 경로
      * @param styurls 소개 이미지 목록
      * @return 공연 이미지 정보가 포함된 List<File>
      */
