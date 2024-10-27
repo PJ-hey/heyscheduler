@@ -37,7 +37,7 @@ public class ArtistService {
      * @return 수정한 아티스트 정보 목록
      */
     @Transactional
-    public List<ArtistResponse> modifyArtists(String[] artistUids) {
+    public ArtistResponse modifyArtists(String[] artistUids) {
         if (artistUids.length == 0) {
             throw new InvalidParameterException(ErrorCode.INVALID_ARTIST_ID);
         }
@@ -81,7 +81,7 @@ public class ArtistService {
      * </p>
      *
      * @param spotifyArtistList Spotify 조회 아티스트 목록
-     * @param artist 아티스트 엔티티
+     * @param artist            아티스트 엔티티
      * @return 입력할 아티스트 정보
      */
     private ArtistRequest getArtistRequest(List<SpotifyArtistResponse> spotifyArtistList, Artist artist) {
@@ -95,7 +95,7 @@ public class ArtistService {
     /**
      * <p>아티스트 이미지 설정</p>
      *
-     * @param artistList 아티스트 엔티티 목록
+     * @param artistList        아티스트 엔티티 목록
      * @param spotifyArtistList Spotify 조회 아티스트 목록
      * @return 아티스트 이미지 정보가 포함된 List<File>
      */
@@ -113,7 +113,7 @@ public class ArtistService {
      * </p>
      *
      * @param artistList 아티스트 엔티티 목록
-     * @param id Spotify 아티스트 ID
+     * @param id         Spotify 아티스트 ID
      * @return Artist 엔티티 PK (= artistId)
      */
     private Long getArtistId(List<Artist> artistList, String id) {
@@ -128,17 +128,15 @@ public class ArtistService {
      * <p>아티스트 수정</p>
      *
      * @param artistList 아티스트 엔티티 목록
-     * @param fileList 아티스트 이미지 목록
+     * @param fileList   아티스트 이미지 목록
      * @return 수정한 아티스트 목록
      */
-    private List<ArtistResponse> updateArtists(List<Artist> artistList, List<File> fileList) {
+    private ArtistResponse updateArtists(List<Artist> artistList, List<File> fileList) {
         List<Artist> resultList = artistRepository.saveAll(artistList);
         fileRepository.saveAll(fileList);
 
         log.info("Updated {} new artists.", artistList.size());
         log.info("Updated {} new files.", fileList.size());
-        return resultList.stream()
-            .map(ArtistResponse::of)
-            .toList();
+        return ArtistResponse.of(resultList);
     }
 }
