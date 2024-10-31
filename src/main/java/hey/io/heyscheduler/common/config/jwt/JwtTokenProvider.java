@@ -103,6 +103,7 @@ public class JwtTokenProvider {
 
         // Access Token 생성
         String accessToken = Jwts.builder()
+            .setHeaderParam("typ", "JWT")
             .setSubject(userId)
             .addClaims(getClaims(user, authorities))
             .setIssuedAt(now)
@@ -112,6 +113,7 @@ public class JwtTokenProvider {
 
         // Refresh Token 생성
         String refreshToken = Jwts.builder()
+            .setHeaderParam("typ", "JWT")
             .setIssuedAt(now)
             .setExpiration(new Date(now.getTime() + refreshTokenTime))
             .signWith(getSigningKey(), SignatureAlgorithm.HS512)
@@ -119,7 +121,7 @@ public class JwtTokenProvider {
 
         return TokenDTO.builder()
             .userId(userId)
-            .grantType("bearer")
+            .grantType("Bearer")
             .accessToken(accessToken)
             .refreshToken(refreshToken)
             .expiresIn(formatExpirationTime(getExpirationTime(accessToken)))
