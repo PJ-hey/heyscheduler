@@ -33,8 +33,8 @@ springdoc:
 
 jwt:
   secret: ${JWT_SECRET}
-#  access-token-expire-time: 3600000
-#  refresh-token-expire-time: 5184000000
+  access-expiration: 3600000
+  refresh-expiration: 5184000000
 
 management:
   endpoints:

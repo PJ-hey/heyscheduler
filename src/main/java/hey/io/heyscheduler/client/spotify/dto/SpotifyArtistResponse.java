@@ -6,7 +6,6 @@ import hey.io.heyscheduler.domain.file.entity.File;
 import hey.io.heyscheduler.domain.file.enums.EntityType;
 import hey.io.heyscheduler.domain.file.enums.FileCategory;
 import hey.io.heyscheduler.domain.file.enums.FileType;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.Arrays;
 import java.util.List;

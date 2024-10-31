@@ -5,7 +5,7 @@ import java.util.List;
 
 public record ArtistResponse(
     int count,  // 변경된 아티스트 수
-    List<ArtistResult> resultList // 변경된 아티스트 목록
+    List<ArtistResult> artistList // 변경된 아티스트 목록
 ) {
 
     public static ArtistResponse of(List<Artist> artists) {
