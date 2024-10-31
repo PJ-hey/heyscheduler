@@ -5,7 +5,7 @@ import java.util.List;
 
 public record PerformanceResponse(
     int count,  // 등록 공연 수
-    List<PerformanceResult> resultList // 등록된 공연 목록
+    List<PerformanceResult> performanceList // 등록된 공연 목록
 ) {
 
     public static PerformanceResponse of(List<Performance> performances) {

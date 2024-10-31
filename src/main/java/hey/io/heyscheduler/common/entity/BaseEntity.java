@@ -3,11 +3,8 @@ package hey.io.heyscheduler.common.entity;
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;
-import jakarta.validation.constraints.NotNull;
-import java.time.LocalDateTime;
 import lombok.Getter;
 import org.springframework.data.annotation.CreatedBy;
-import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -18,8 +15,8 @@ public abstract class BaseEntity extends BaseTimeEntity {
 
     @CreatedBy
     @Column(updatable = false)
-    private int createdBy; // 등록자
+    private String createdBy; // 등록자
 
     @LastModifiedBy
-    private int modifiedBy; // 수정자
+    private String modifiedBy; // 수정자
 }

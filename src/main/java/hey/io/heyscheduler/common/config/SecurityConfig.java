@@ -9,6 +9,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -37,9 +39,8 @@ public class SecurityConfig {
         // 요청 인증 설정
         http.authorizeHttpRequests(authorize -> authorize
             .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/health_check").permitAll() // Swagger 경로 허용
+            .requestMatchers("/access").permitAll() // 토큰 발급 기능 허용
             .requestMatchers("/artists/spotify").permitAll() // Spotify 아티스트 목록 조회 기능 허용
-//            .requestMatchers("/performances").permitAll()
-//            .requestMatchers("/artists").permitAll()
             .anyRequest().authenticated() // 그 외 요청은 인증 필요
         );
 
@@ -57,5 +58,15 @@ public class SecurityConfig {
     @Bean
     public AuthenticationManager authenticationManager(HttpSecurity http) {
         return http.getSharedObject(AuthenticationManager.class);
+    }
+
+    /**
+     * <p>BCryptPasswordEncoder bean 설정</p>
+     *
+     * @return PasswordEncoder
+     */
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 }
