@@ -14,7 +14,7 @@ public class TokenDTO {
     @Schema(description = "사용자 ID", defaultValue = "userId")
     private String userId;
 
-    @Schema(description = "권한 위임 유형", defaultValue = "bearer ")
+    @Schema(description = "권한 위임 유형", defaultValue = "Bearer")
     private String grantType;
 
     @Schema(description = "액세스 토큰", example = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9")
