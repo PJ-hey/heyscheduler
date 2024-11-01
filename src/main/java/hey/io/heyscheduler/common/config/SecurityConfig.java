@@ -66,9 +66,7 @@ public class SecurityConfig {
             http.csrf(AbstractHttpConfigurer::disable);
         }
         if ("prod".equals(profiles)) { // 운영 환경에서 SSL 적용 (https + 포트 전환)
-            http.requiresChannel(requiresChannel -> {
-                requiresChannel.anyRequest().requiresSecure();
-            });
+            http.requiresChannel(requiresChannel -> requiresChannel.anyRequest().requiresSecure());
         }
         return http;
     }

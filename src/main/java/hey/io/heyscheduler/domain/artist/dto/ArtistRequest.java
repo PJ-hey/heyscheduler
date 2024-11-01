@@ -1,12 +1,8 @@
 package hey.io.heyscheduler.domain.artist.dto;
 
 import hey.io.heyscheduler.domain.artist.enums.ArtistStatus;
-import jakarta.persistence.Column;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
 
 @Getter
 @Builder

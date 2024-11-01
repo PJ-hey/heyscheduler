@@ -93,9 +93,7 @@ public class JwtTokenProvider {
     // 인증 정보로 토큰 생성
     public TokenDTO createToken(User user) {
         String userId = user.getUserId();
-
         Date now = new Date();
-        new Date(now.getTime() + accessTokenTime);
 
         // Access Token 생성
         String accessToken = Jwts.builder()
