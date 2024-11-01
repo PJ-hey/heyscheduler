@@ -14,6 +14,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.domain.Persistable;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 @Entity
 @Table(schema = "system")
@@ -47,5 +48,11 @@ public class User extends BaseEntity implements Persistable<String> {
     @Override
     public boolean isNew() {
         return getCreatedAt() == null;
+    }
+
+    public List<SimpleGrantedAuthority> getAuthorities() {
+        return this.getUserAuth().stream()
+            .map(userAuth -> new SimpleGrantedAuthority(userAuth.getAuth().getAuthId()))
+            .toList();
     }
 }

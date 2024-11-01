@@ -1,5 +1,7 @@
 package hey.io.heyscheduler.common.config.jwt;
 
+import hey.io.heyscheduler.common.exception.ErrorCode;
+import hey.io.heyscheduler.common.exception.unauthorized.UnAuthorizedException;
 import hey.io.heyscheduler.domain.user.dto.TokenDTO;
 import hey.io.heyscheduler.domain.user.dto.UserDTO;
 import hey.io.heyscheduler.domain.user.entity.User;
@@ -16,7 +18,6 @@ import io.jsonwebtoken.security.SecurityException;
 import jakarta.servlet.http.HttpServletRequest;
 import java.security.Key;
 import java.text.SimpleDateFormat;
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
@@ -54,11 +55,8 @@ public class JwtTokenProvider {
         UserDTO userDTO = userService.loadUserByUsername(userId);
 
         // 권한 정보 조회
-        List<String> authorityStrings = (List<String>) claims.get("authorities");
-        Collection<? extends GrantedAuthority> authorities =
-            authorityStrings.stream()
-                .map(SimpleGrantedAuthority::new)
-                .toList();
+        @SuppressWarnings("unchecked")
+        List<? extends GrantedAuthority> authorities = (List<SimpleGrantedAuthority>) claims.get("authorities");
 
         return new UsernamePasswordAuthenticationToken(userDTO, token, authorities);
     }
@@ -70,17 +68,20 @@ public class JwtTokenProvider {
             return true;
         } catch (SecurityException | MalformedJwtException e) {
             log.info("잘못된 JWT 서명입니다.");
+            throw new UnAuthorizedException(ErrorCode.MALFORMED_JWT);
         } catch (ExpiredJwtException e) {
             log.info("만료된 JWT 토큰입니다.");
+            throw new UnAuthorizedException(ErrorCode.EXPIRED_JWT);
         } catch (UnsupportedJwtException e) {
             log.info("지원되지 않는 JWT 토큰입니다.");
+            throw new UnAuthorizedException(ErrorCode.UNSUPPORTED_JWT);
         } catch (IllegalArgumentException e) {
             log.info("JWT 토큰이 잘못되었습니다.");
+            throw new UnAuthorizedException(ErrorCode.ILLEGAL_JWT);
         }
-        return false;
     }
 
-    // Request에서 헤더로부터 토큰 정보 추출
+    // Request 에서 헤더로부터 토큰 정보 추출
     public String resolveToken(HttpServletRequest request) {
         String bearerToken = request.getHeader("Authorization");
         if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
@@ -93,11 +94,6 @@ public class JwtTokenProvider {
     public TokenDTO createToken(User user) {
         String userId = user.getUserId();
 
-        // 권한 조회
-        List<String> authorities = user.getUserAuth().stream()
-            .map(userAuth -> userAuth.getAuth().getAuthId())
-            .toList();
-
         Date now = new Date();
         new Date(now.getTime() + accessTokenTime);
 
@@ -105,7 +101,7 @@ public class JwtTokenProvider {
         String accessToken = Jwts.builder()
             .setHeaderParam("typ", "JWT")
             .setSubject(userId)
-            .addClaims(getClaims(user, authorities))
+            .addClaims(getClaims(user))
             .setIssuedAt(now)
             .setExpiration(new Date(now.getTime() + accessTokenTime))
             .signWith(getSigningKey(), SignatureAlgorithm.HS512)
@@ -129,10 +125,11 @@ public class JwtTokenProvider {
     }
 
     // 인증 정보로 claims 생성
-    private Claims getClaims(User user, List<String> authorities) {
-        // TODO: 추후 권한 정보 통합
+    private Claims getClaims(User user) {
+        List<SimpleGrantedAuthority> authorities = user.getAuthorities();
+
         Claims claims = Jwts.claims();
-        claims.put("userInfo", UserDTO.of(user));
+        claims.put("userInfo", UserDTO.of(user, authorities));
         claims.put("authorities", authorities);
         return claims;
     }
