@@ -19,13 +19,11 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 @Configuration
 public class RedisConfig {
+
     @Value("${spring.data.redis.host}")
     private String redisHost;
     @Value("${spring.data.redis.port}")
     private int redisPort;
-
-    public RedisConfig() {
-    }
 
     @Bean
     public RedisConnectionFactory redisConnectionFactory() {
@@ -43,9 +41,12 @@ public class RedisConfig {
 
     @Bean
     public RedisCacheManager redisCacheManager(RedisConnectionFactory redisConnectionFactory) {
-        RedisCacheConfiguration redisCacheConfiguration = RedisCacheConfiguration.defaultCacheConfig().serializeKeysWith(SerializationPair.fromSerializer(new StringRedisSerializer())).serializeValuesWith(SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer()));
+        RedisCacheConfiguration redisCacheConfiguration = RedisCacheConfiguration.defaultCacheConfig()
+            .serializeKeysWith(SerializationPair.fromSerializer(new StringRedisSerializer()))
+            .serializeValuesWith(SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer()));
         Map<String, RedisCacheConfiguration> cacheConfigurations = new HashMap<>();
         cacheConfigurations.put("performance", redisCacheConfiguration.entryTtl(Duration.ofMinutes(30L)));
-        return RedisCacheManagerBuilder.fromConnectionFactory(redisConnectionFactory).cacheDefaults(redisCacheConfiguration).withInitialCacheConfigurations(cacheConfigurations).build();
+        return RedisCacheManagerBuilder.fromConnectionFactory(redisConnectionFactory)
+            .cacheDefaults(redisCacheConfiguration).withInitialCacheConfigurations(cacheConfigurations).build();
     }
 }

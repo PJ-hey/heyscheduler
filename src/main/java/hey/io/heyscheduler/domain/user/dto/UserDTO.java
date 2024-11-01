@@ -6,7 +6,6 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -28,22 +27,19 @@ public class UserDTO implements UserDetails {
     private boolean enabled; // 사용 여부
     private Set<GrantedAuthority> authorities; // 권한 목록
 
-    public static UserDTO of(User user) {
+    public static UserDTO of(User user, Collection<? extends GrantedAuthority> authorities) {
         return UserDTO.builder()
             .userId(user.getUserId())
             .name(user.getName())
             .email(user.getEmail())
             .enabled(user.isEnabled())
+            .authorities(Collections.unmodifiableSet(sortAuthorities(authorities)))
             .build();
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return authorities;
-    }
-
-    public void setAuthorities(Collection<? extends GrantedAuthority> authorities) {
-        this.authorities = Collections.unmodifiableSet(sortAuthorities(authorities));
     }
 
     @Override

@@ -1,5 +1,6 @@
 package hey.io.heyscheduler.domain.user.entity;
 
+import hey.io.heyscheduler.domain.auth.entity.Auth;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;

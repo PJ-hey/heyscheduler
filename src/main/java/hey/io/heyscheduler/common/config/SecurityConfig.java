@@ -2,6 +2,7 @@ package hey.io.heyscheduler.common.config;
 
 import hey.io.heyscheduler.common.config.filter.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -19,6 +20,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class SecurityConfig {
 
+    @Value("${spring.profiles.active}")
+    private String profiles;
+
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     /**
@@ -30,24 +34,41 @@ public class SecurityConfig {
      */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        // CSRF 비활성화
-        http.csrf(AbstractHttpConfigurer::disable);
+        // CSRF 설정
+        return setCsrf(http)
 
-        // 세션을 사용하지 않음
-        http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+            // 세션을 사용하지 않음
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-        // 요청 인증 설정
-        http.authorizeHttpRequests(authorize -> authorize
-            .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/health_check").permitAll() // Swagger 경로 허용
-            .requestMatchers("/access").permitAll() // 토큰 발급 기능 허용
-            .requestMatchers("/artists/spotify").permitAll() // Spotify 아티스트 목록 조회 기능 허용
-            .anyRequest().authenticated() // 그 외 요청은 인증 필요
-        );
+            // 요청 인증 설정
+            .authorizeHttpRequests(authorize -> authorize
+                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/health_check").permitAll() // Swagger 경로 허용
+                .requestMatchers("/access").permitAll() // 토큰 발급 기능 허용
+                .requestMatchers("/artists/spotify").permitAll() // Spotify 아티스트 목록 조회 기능 허용
+                .anyRequest().authenticated() // 그 외 요청은 인증 필요
+            )
 
-        // JWT 인증 필터 적용
-        http.addFilterBefore(this.jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+            // 익명 권한 설정
+            .anonymous(anonymous -> anonymous
+                .principal("guest")
+                .authorities("ANONYMOUS"))
 
-        return http.build();
+            // JWT 인증 필터 적용
+            .addFilterBefore(this.jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+            .build();
+    }
+
+    private HttpSecurity setCsrf(HttpSecurity http) throws Exception {
+        if ("local".equals(profiles)) { // 로컬 환경에서 CSRF 기능 제거
+            http.csrf(AbstractHttpConfigurer::disable);
+        }
+        if ("dev".equals(profiles)) { // 개발 환경에서 CSRF 기능 제거
+            http.csrf(AbstractHttpConfigurer::disable);
+        }
+        if ("prod".equals(profiles)) { // 운영 환경에서 SSL 적용 (https + 포트 전환)
+            http.requiresChannel(requiresChannel -> requiresChannel.anyRequest().requiresSecure());
+        }
+        return http;
     }
 
     /**
