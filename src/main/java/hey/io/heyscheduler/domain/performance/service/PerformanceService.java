@@ -11,11 +11,12 @@ import hey.io.heyscheduler.domain.artist.entity.Artist;
 import hey.io.heyscheduler.domain.artist.enums.ArtistStatus;
 import hey.io.heyscheduler.domain.artist.enums.ArtistType;
 import hey.io.heyscheduler.domain.artist.repository.ArtistRepository;
+import hey.io.heyscheduler.domain.file.dto.FileResponse;
 import hey.io.heyscheduler.domain.file.entity.File;
 import hey.io.heyscheduler.domain.file.enums.EntityType;
 import hey.io.heyscheduler.domain.file.enums.FileCategory;
 import hey.io.heyscheduler.domain.file.enums.FileType;
-import hey.io.heyscheduler.domain.file.repository.FileRepository;
+import hey.io.heyscheduler.domain.file.service.FileService;
 import hey.io.heyscheduler.domain.performance.dto.PerformanceResponse;
 import hey.io.heyscheduler.domain.performance.dto.PerformanceSearch;
 import hey.io.heyscheduler.domain.performance.entity.Performance;
@@ -49,7 +50,7 @@ public class PerformanceService {
     private final PerformanceRepository performanceRepository;
     private final PlaceRepository placeRepository;
     private final ArtistRepository artistRepository;
-    private final FileRepository fileRepository;
+    private final FileService fileService;
     private final KopisFeignClient kopisFeignClient;
 
     @Value("${client.kopis.api-key}")
@@ -110,7 +111,8 @@ public class PerformanceService {
 
                 if (!files.isEmpty()) {
                     files.forEach(file -> file.updatePerformanceFile(performance));
-                    fileRepository.saveAll(files);
+                    FileResponse fileResponse = fileService.createFiles(files);
+                    log.info("Inserted {} new files.", fileResponse.count());
                 }
             });
 

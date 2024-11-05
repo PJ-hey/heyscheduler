@@ -16,6 +16,19 @@ spring:
   config:
     activate:
       on-profile: common
+  cloud:
+    aws:
+      credentials:
+        access-key: ${AWS_ACCESS_KEY}
+        secret-key: ${AWS_SECRET_KEY}
+      s3:
+        bucket: hey-bucket
+      region:
+        static: ${AWS_REGION}
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 10MB
   web:
     locale: ko_KR
   main:

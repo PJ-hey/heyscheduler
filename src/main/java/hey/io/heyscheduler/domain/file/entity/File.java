@@ -83,4 +83,8 @@ public class File extends BaseTimeEntity {
     public void updatePerformanceFile(Performance performance) {
         this.entityId = performance.getPerformanceId();
     }
+
+    public void updateFileUrl(String fileUrl) {
+        this.fileUrl = fileUrl;
+    }
 }
