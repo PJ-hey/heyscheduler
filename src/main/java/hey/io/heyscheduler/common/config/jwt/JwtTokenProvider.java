@@ -19,6 +19,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.security.Key;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.TimeZone;
 import lombok.RequiredArgsConstructor;
@@ -54,9 +55,12 @@ public class JwtTokenProvider {
         String userId = claims.getSubject();
         UserDTO userDTO = userService.loadUserByUsername(userId);
 
-        // 권한 정보 조회
+        // 권한 정보 조회 및 변환
         @SuppressWarnings("unchecked")
-        List<? extends GrantedAuthority> authorities = (List<SimpleGrantedAuthority>) claims.get("authorities");
+        List<LinkedHashMap<String, String>> authoritiesMap = (List<LinkedHashMap<String, String>>) claims.get("authorities");
+        List<? extends GrantedAuthority> authorities = authoritiesMap.stream()
+            .map(authMap -> new SimpleGrantedAuthority(authMap.get("authority")))
+            .toList();
 
         return new UsernamePasswordAuthenticationToken(userDTO, token, authorities);
     }
