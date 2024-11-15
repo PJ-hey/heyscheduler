@@ -1,7 +1,7 @@
 package hey.io.heyscheduler.domain.artist.service;
 
-import hey.io.heyscheduler.client.spotify.SpotifyService;
-import hey.io.heyscheduler.client.spotify.dto.SpotifyArtistResponse;
+import hey.io.heyscheduler.common.client.spotify.SpotifyService;
+import hey.io.heyscheduler.common.client.spotify.dto.SpotifyArtistResponse;
 import hey.io.heyscheduler.common.exception.ErrorCode;
 import hey.io.heyscheduler.common.exception.badrequest.InvalidParameterException;
 import hey.io.heyscheduler.common.exception.notfound.EntityNotFoundException;
@@ -29,7 +29,7 @@ public class ArtistService {
 
     /**
      * <p>
-     * <b>아티스트 정보 일괄 수정</b> <br/>
+     * <b>아티스트 일괄 수정</b> <br/>
      * Spotify의 아티스트 정보를 DB로 덮어쓰기
      * </p>
      *

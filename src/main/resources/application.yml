@@ -57,14 +57,14 @@ management:
 client:
   kopis:
     api-key: ${KOPIS_API_KEY}
-    url: http://www.kopis.or.kr/openApi/restful
+    url: ${KOPIS_API_URL}
   spotify:
     client-id: ${SPOTIFY_CLIENT_ID}
     client-secret: ${SPOTIFY_CLIENT_SECRET}
 
-fcm:
-  service-account-file: key/heyapplication-40e61-firebase-adminsdk-cd5mk-6b4dd26836.json
-  project-id: heyapplication-40e61
+firebase:
+  project-id: ${FIREBASE_ID}
+  key-path: ${FIREBASE_KEY}
 
 ---
 spring:

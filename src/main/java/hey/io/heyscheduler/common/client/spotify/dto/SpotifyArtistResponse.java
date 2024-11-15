@@ -1,4 +1,4 @@
-package hey.io.heyscheduler.client.spotify.dto;
+package hey.io.heyscheduler.common.client.spotify.dto;
 
 import hey.io.heyscheduler.domain.artist.dto.ArtistRequest;
 import hey.io.heyscheduler.domain.artist.enums.ArtistStatus;

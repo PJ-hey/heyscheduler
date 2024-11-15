@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface PerformanceRepository extends JpaRepository<Performance, Long> {
+public interface PerformanceRepository extends JpaRepository<Performance, Long>, PerformanceQueryRepository {
 
     boolean existsPerformanceByPerformanceUid(String performanceUid);
 }

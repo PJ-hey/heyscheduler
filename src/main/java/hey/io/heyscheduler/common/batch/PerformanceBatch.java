@@ -1,4 +1,4 @@
-package hey.io.heyscheduler.batch;
+package hey.io.heyscheduler.common.batch;
 
 import hey.io.heyscheduler.domain.performance.dto.PerformanceSearch;
 import hey.io.heyscheduler.domain.performance.service.PerformanceService;

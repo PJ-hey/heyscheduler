@@ -141,4 +141,19 @@ public class Performance extends BaseTimeEntity {
         PerformanceArtist performanceArtist = PerformanceArtist.of(this, artist);
         this.performanceArtists.add(performanceArtist);
     }
+
+    // 공연 상태 수정
+    public Performance updatePerformanceStatus() {
+        LocalDate now = LocalDate.now();
+
+        if (now.isBefore(startDate)) { // 현재 날짜가 시작일 이전인 경우
+            this.performanceStatus = PerformanceStatus.READY;
+        } else if (now.isAfter(endDate)) { // 현재 날짜가 종료일 이후인 경우
+            this.performanceStatus = PerformanceStatus.CLOSED;
+        } else { // 현재 날짜가 시작일~종료일 사이인 경우
+            this.performanceStatus = PerformanceStatus.ONGOING;
+        }
+
+        return this;
+    }
 }

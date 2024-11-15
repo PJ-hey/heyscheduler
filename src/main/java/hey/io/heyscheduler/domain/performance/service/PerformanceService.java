@@ -1,11 +1,12 @@
 package hey.io.heyscheduler.domain.performance.service;
 
-import hey.io.heyscheduler.client.kopis.KopisFeignClient;
-import hey.io.heyscheduler.client.kopis.dto.KopisPerformanceRequest;
-import hey.io.heyscheduler.client.kopis.dto.KopisPerformanceResponse;
-import hey.io.heyscheduler.client.kopis.dto.KopisPerformanceResponse.Relate;
-import hey.io.heyscheduler.client.kopis.dto.KopisPlaceResponse;
+import hey.io.heyscheduler.common.client.kopis.KopisFeignClient;
+import hey.io.heyscheduler.common.client.kopis.dto.KopisPerformanceRequest;
+import hey.io.heyscheduler.common.client.kopis.dto.KopisPerformanceResponse;
+import hey.io.heyscheduler.common.client.kopis.dto.KopisPerformanceResponse.Relate;
+import hey.io.heyscheduler.common.client.kopis.dto.KopisPlaceResponse;
 import hey.io.heyscheduler.common.exception.ErrorCode;
+import hey.io.heyscheduler.common.exception.badrequest.InvalidParameterException;
 import hey.io.heyscheduler.common.exception.notfound.EntityNotFoundException;
 import hey.io.heyscheduler.domain.artist.entity.Artist;
 import hey.io.heyscheduler.domain.artist.enums.ArtistStatus;
@@ -17,6 +18,7 @@ import hey.io.heyscheduler.domain.file.enums.EntityType;
 import hey.io.heyscheduler.domain.file.enums.FileCategory;
 import hey.io.heyscheduler.domain.file.enums.FileType;
 import hey.io.heyscheduler.domain.file.service.FileService;
+import hey.io.heyscheduler.domain.performance.dto.PerformanceArtistDTO;
 import hey.io.heyscheduler.domain.performance.dto.PerformanceResponse;
 import hey.io.heyscheduler.domain.performance.dto.PerformanceSearch;
 import hey.io.heyscheduler.domain.performance.entity.Performance;
@@ -25,9 +27,13 @@ import hey.io.heyscheduler.domain.performance.entity.PerformanceTicketing;
 import hey.io.heyscheduler.domain.performance.entity.Place;
 import hey.io.heyscheduler.domain.performance.repository.PerformanceRepository;
 import hey.io.heyscheduler.domain.performance.repository.PlaceRepository;
+import hey.io.heyscheduler.domain.push.dto.PushRequest;
+import hey.io.heyscheduler.domain.push.enums.PushType;
+import hey.io.heyscheduler.domain.push.service.PushService;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
@@ -50,8 +56,9 @@ public class PerformanceService {
     private final PerformanceRepository performanceRepository;
     private final PlaceRepository placeRepository;
     private final ArtistRepository artistRepository;
-    private final FileService fileService;
     private final KopisFeignClient kopisFeignClient;
+    private final FileService fileService;
+    private final PushService pushService;
 
     @Value("${client.kopis.api-key}")
     private String apiKey; // KOPIS API key
@@ -361,5 +368,35 @@ public class PerformanceService {
             .map(String::trim)
             .filter(name -> !name.isBlank())
             .toList();
+    }
+
+    /**
+     * <p>
+     * <b>공연 일괄 수정</b> <br/>
+     * 공연 상태를 수정하고, 해당 아티스트를 팔로우한 회원들에게 PUSH 알림 발송
+     * </p>
+     *
+     * @param performanceIds 공연 ID 목록
+     * @return 수정한 공연 정보 목록
+     */
+    @Transactional
+    public PerformanceResponse modifyPerformances(List<Long> performanceIds) {
+        if (performanceIds.isEmpty()) {
+            throw new InvalidParameterException(ErrorCode.INVALID_PERFORMANCE_ID);
+        }
+
+        // 1. 공연 상태 수정
+        List<Performance> performanceList = performanceRepository.findAllById(performanceIds).stream()
+            .map(Performance::updatePerformanceStatus)
+            .toList();
+        performanceRepository.saveAllAndFlush(performanceList);
+
+        // 2. PUSH 알림 발송
+        Map<Long, String> artists = performanceRepository.selectPerformanceArtistList(performanceIds).stream()
+            .collect(Collectors.toMap(PerformanceArtistDTO::artistId, PerformanceArtistDTO::artistName));
+
+        pushService.sendMessageByTopic(PushRequest.of(PushType.BATCH_PERFORMANCE_OPEN, artists));
+
+        return PerformanceResponse.of(performanceList);
     }
 }
