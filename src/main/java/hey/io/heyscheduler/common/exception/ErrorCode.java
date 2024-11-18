@@ -52,6 +52,9 @@ public enum ErrorCode {
     MEMBER_ALREADY_EXIST(HttpStatus.CONFLICT, "이미 가입된 회원입니다."),
     INCORRECT_USER(HttpStatus.UNAUTHORIZED, "비밀번호가 일치하지 않습니다."),
 
+    // Performance
+    INVALID_PERFORMANCE_ID(HttpStatus.BAD_REQUEST, "공연 ID 입력 값이 올바르지 않습니다."),
+
     // Artist
     INVALID_ARTIST_ID(HttpStatus.BAD_REQUEST, "아티스트 ID 입력 값이 올바르지 않습니다."),
     TOO_MANY_ARTIST_ID(HttpStatus.BAD_REQUEST, "아티스트 ID는 최대 50개까지 입력 가능합니다."),

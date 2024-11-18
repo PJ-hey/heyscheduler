@@ -1,7 +1,7 @@
 package hey.io.heyscheduler.domain.artist.controller;
 
-import hey.io.heyscheduler.client.spotify.SpotifyService;
-import hey.io.heyscheduler.client.spotify.dto.SpotifyArtistResponse;
+import hey.io.heyscheduler.common.client.spotify.SpotifyService;
+import hey.io.heyscheduler.common.client.spotify.dto.SpotifyArtistResponse;
 import hey.io.heyscheduler.common.config.swagger.ApiErrorCodes;
 import hey.io.heyscheduler.common.exception.ErrorCode;
 import hey.io.heyscheduler.common.response.ApiResponse;
@@ -45,12 +45,12 @@ public class ArtistController {
     }
 
     /**
-     * <p>아티스트 정보 일괄 수정</p>
+     * <p>아티스트 일괄 수정</p>
      *
      * @param artistUids Spotify 아티스트 ID 목록
      * @return 수정한 아티스트 정보 목록
      */
-    @Operation(summary = "아티스트 정보 일괄 수정", description = "Spotify에서 ID로 아티스트 정보를 조회 후 DB로 동기화합니다.")
+    @Operation(summary = "아티스트 일괄 수정", description = "Spotify에서 ID로 아티스트 정보를 조회 후 DB로 동기화합니다.")
     @ApiErrorCodes({ErrorCode.INVALID_ARTIST_ID, ErrorCode.TOO_MANY_ARTIST_ID, ErrorCode.ARTIST_NOT_FOUND})
     @PutMapping("/artists")
     public ApiResponse<ArtistResponse> modifyArtists(@RequestBody String[] artistUids) {

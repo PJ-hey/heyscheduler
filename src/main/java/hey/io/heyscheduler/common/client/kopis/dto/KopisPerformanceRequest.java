@@ -1,4 +1,4 @@
-package hey.io.heyscheduler.client.kopis.dto;
+package hey.io.heyscheduler.common.client.kopis.dto;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;

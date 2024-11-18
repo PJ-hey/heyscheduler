@@ -1,6 +1,6 @@
-package hey.io.heyscheduler.client.spotify;
+package hey.io.heyscheduler.common.client.spotify;
 
-import hey.io.heyscheduler.client.spotify.dto.SpotifyArtistResponse;
+import hey.io.heyscheduler.common.client.spotify.dto.SpotifyArtistResponse;
 import hey.io.heyscheduler.common.exception.ErrorCode;
 import hey.io.heyscheduler.common.exception.badrequest.InvalidParameterException;
 import hey.io.heyscheduler.common.exception.notfound.EntityNotFoundException;

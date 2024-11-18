@@ -1,4 +1,4 @@
-package hey.io.heyscheduler.client.kopis.dto;
+package hey.io.heyscheduler.common.client.kopis.dto;
 
 import hey.io.heyscheduler.domain.performance.entity.Place;
 

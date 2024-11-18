@@ -1,11 +1,12 @@
 package hey.io.heyscheduler.domain.performance.service;
 
-import hey.io.heyscheduler.client.kopis.KopisFeignClient;
-import hey.io.heyscheduler.client.kopis.dto.KopisPerformanceRequest;
-import hey.io.heyscheduler.client.kopis.dto.KopisPerformanceResponse;
-import hey.io.heyscheduler.client.kopis.dto.KopisPerformanceResponse.Relate;
-import hey.io.heyscheduler.client.kopis.dto.KopisPlaceResponse;
+import hey.io.heyscheduler.common.client.kopis.KopisFeignClient;
+import hey.io.heyscheduler.common.client.kopis.dto.KopisPerformanceRequest;
+import hey.io.heyscheduler.common.client.kopis.dto.KopisPerformanceResponse;
+import hey.io.heyscheduler.common.client.kopis.dto.KopisPerformanceResponse.Relate;
+import hey.io.heyscheduler.common.client.kopis.dto.KopisPlaceResponse;
 import hey.io.heyscheduler.common.exception.ErrorCode;
+import hey.io.heyscheduler.common.exception.badrequest.InvalidParameterException;
 import hey.io.heyscheduler.common.exception.notfound.EntityNotFoundException;
 import hey.io.heyscheduler.domain.artist.entity.Artist;
 import hey.io.heyscheduler.domain.artist.enums.ArtistStatus;
@@ -17,6 +18,8 @@ import hey.io.heyscheduler.domain.file.enums.EntityType;
 import hey.io.heyscheduler.domain.file.enums.FileCategory;
 import hey.io.heyscheduler.domain.file.enums.FileType;
 import hey.io.heyscheduler.domain.file.service.FileService;
+import hey.io.heyscheduler.domain.performance.dto.PerformanceDTO.PerformanceArtistDTO;
+import hey.io.heyscheduler.domain.performance.dto.PerformanceDTO.PerformanceTicketingDTO;
 import hey.io.heyscheduler.domain.performance.dto.PerformanceResponse;
 import hey.io.heyscheduler.domain.performance.dto.PerformanceSearch;
 import hey.io.heyscheduler.domain.performance.entity.Performance;
@@ -25,9 +28,15 @@ import hey.io.heyscheduler.domain.performance.entity.PerformanceTicketing;
 import hey.io.heyscheduler.domain.performance.entity.Place;
 import hey.io.heyscheduler.domain.performance.repository.PerformanceRepository;
 import hey.io.heyscheduler.domain.performance.repository.PlaceRepository;
+import hey.io.heyscheduler.domain.push.dto.PushRequest;
+import hey.io.heyscheduler.domain.push.dto.PushResponse;
+import hey.io.heyscheduler.domain.push.enums.PushType;
+import hey.io.heyscheduler.domain.push.service.PushService;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
@@ -50,8 +59,9 @@ public class PerformanceService {
     private final PerformanceRepository performanceRepository;
     private final PlaceRepository placeRepository;
     private final ArtistRepository artistRepository;
-    private final FileService fileService;
     private final KopisFeignClient kopisFeignClient;
+    private final FileService fileService;
+    private final PushService pushService;
 
     @Value("${client.kopis.api-key}")
     private String apiKey; // KOPIS API key
@@ -361,5 +371,62 @@ public class PerformanceService {
             .map(String::trim)
             .filter(name -> !name.isBlank())
             .toList();
+    }
+
+    /**
+     * <p>
+     * <b>공연 일괄 수정</b> <br/>
+     * 공연 상태를 수정하고, 해당 아티스트를 팔로우한 회원들에게 PUSH 알림 발송
+     * </p>
+     *
+     * @param performanceIds 공연 ID 목록
+     * @return 수정한 공연 정보 목록
+     */
+    @Transactional
+    public PerformanceResponse modifyPerformances(List<Long> performanceIds) {
+        if (performanceIds.isEmpty()) {
+            throw new InvalidParameterException(ErrorCode.INVALID_PERFORMANCE_ID);
+        }
+
+        // 1. 공연 상태 수정
+        List<Performance> performanceList = performanceRepository.findAllById(performanceIds).stream()
+            .map(Performance::updatePerformanceStatus)
+            .toList();
+        performanceRepository.saveAllAndFlush(performanceList);
+
+        // 2. PUSH 알림 발송
+        Map<Long, String> artists = performanceRepository.selectPerformanceArtistList(performanceIds).stream()
+            .collect(Collectors.toMap(PerformanceArtistDTO::getArtistId, PerformanceArtistDTO::getArtistName));
+
+        pushService.sendMessageByTopic(PushRequest.of(PushType.BATCH_PERFORMANCE_OPEN, artists));
+
+        return PerformanceResponse.of(performanceList);
+    }
+
+    /**
+     * <p>티켓팅 임박 공연 알림 발송</p>
+     *
+     * @param currentDateTime 조회 기준 시각
+     * @return 전송 성공/실패 수
+     */
+    @Transactional
+    public PushResponse modifyPerformanceTicketings(LocalDateTime currentDateTime) {
+        // 1. 예매 당일, D-1일 공연 조회
+        List<PerformanceTicketingDTO> ticketingList = performanceRepository.selectPerformanceTicketingList(currentDateTime);
+
+        // 2. PUSH 알림 발송 - 예매 당일 공연
+        Map<Long, String> ticketingOpenPerformances = ticketingList.stream()
+            .filter(ticketing -> ticketing.getTicketingType() == PushType.BATCH_TICKETING_OPEN)
+            .collect(Collectors.toMap(PerformanceTicketingDTO::getPerformanceId, PerformanceTicketingDTO::getPerformanceName));
+        PushResponse pushOpenResponse = pushService.sendMessageByTopic(PushRequest.of(PushType.BATCH_TICKETING_OPEN, ticketingOpenPerformances));
+
+        // 3. PUSH 알림 발송 - 예매 D-1일 공연
+        Map<Long, String> ticketingD1Performances = ticketingList.stream()
+            .filter(ticketing -> ticketing.getTicketingType() == PushType.BATCH_TICKETING_D1)
+            .collect(Collectors.toMap(PerformanceTicketingDTO::getPerformanceId, PerformanceTicketingDTO::getPerformanceName));
+        PushResponse pushD1Response = pushService.sendMessageByTopic(PushRequest.of(PushType.BATCH_TICKETING_D1, ticketingD1Performances));
+
+        return PushResponse.of(pushOpenResponse.successCount() + pushD1Response.successCount(),
+            pushOpenResponse.failureCount() + pushD1Response.failureCount());
     }
 }

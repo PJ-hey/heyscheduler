@@ -1,6 +1,7 @@
-package hey.io.heyscheduler.client.kopis.dto;
+package hey.io.heyscheduler.common.client.kopis.dto;
 
 import hey.io.heyscheduler.domain.artist.entity.Artist;
+import hey.io.heyscheduler.domain.file.entity.File;
 import hey.io.heyscheduler.domain.performance.entity.Performance;
 import hey.io.heyscheduler.domain.performance.entity.PerformancePrice;
 import hey.io.heyscheduler.domain.performance.entity.PerformanceTicketing;
@@ -8,7 +9,6 @@ import hey.io.heyscheduler.domain.performance.entity.Place;
 import hey.io.heyscheduler.domain.performance.enums.PerformanceStatus;
 import hey.io.heyscheduler.domain.performance.enums.PerformanceType;
 import hey.io.heyscheduler.domain.performance.enums.TicketStatus;
-import hey.io.heyscheduler.domain.file.entity.File;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -35,16 +35,13 @@ public record KopisPerformanceResponse(
 
     @Getter
     public static class Relate {
+
         String relatenm; // 티켓 예매처
         String relateurl; // 티켓 링크
     }
 
     public Performance toPerformance(Place place, List<PerformancePrice> priceList,
         List<PerformanceTicketing> ticketingList, List<File> fileList, List<Artist> artistList) {
-        PerformanceStatus performanceStatus = PerformanceStatus.getByKopisName(prfstate);
-        TicketStatus ticketStatus = TicketStatus.getByPerformanceStatus(performanceStatus);
-        performanceStatus = PerformanceStatus.INIT; // 초기 상태 설정
-
         return Performance.builder()
             .performanceUid(mt20id)
             .performanceType(getPerformanceType(visit, festival))
@@ -54,8 +51,8 @@ public record KopisPerformanceResponse(
             .place(place)
             .runningTime(prfruntime.isBlank() ? null : prfruntime)
             .viewingAge(prfage.isBlank() ? null : prfage)
-            .ticketStatus(ticketStatus)
-            .performanceStatus(performanceStatus)
+            .ticketStatus(TicketStatus.READY)
+            .performanceStatus(PerformanceStatus.INIT)
             .prices(priceList)
             .ticketings(ticketingList)
             .performanceFiles(fileList)

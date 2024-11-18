@@ -1,8 +1,8 @@
-package hey.io.heyscheduler.client.kopis;
+package hey.io.heyscheduler.common.client.kopis;
 
-import hey.io.heyscheduler.client.kopis.dto.KopisPerformanceRequest;
-import hey.io.heyscheduler.client.kopis.dto.KopisPerformanceResponse;
-import hey.io.heyscheduler.client.kopis.dto.KopisPlaceResponse;
+import hey.io.heyscheduler.common.client.kopis.dto.KopisPerformanceRequest;
+import hey.io.heyscheduler.common.client.kopis.dto.KopisPerformanceResponse;
+import hey.io.heyscheduler.common.client.kopis.dto.KopisPlaceResponse;
 import hey.io.heyscheduler.common.config.FeignConfig;
 import java.util.List;
 import org.springframework.cloud.openfeign.FeignClient;
