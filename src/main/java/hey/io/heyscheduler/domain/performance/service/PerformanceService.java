@@ -18,7 +18,8 @@ import hey.io.heyscheduler.domain.file.enums.EntityType;
 import hey.io.heyscheduler.domain.file.enums.FileCategory;
 import hey.io.heyscheduler.domain.file.enums.FileType;
 import hey.io.heyscheduler.domain.file.service.FileService;
-import hey.io.heyscheduler.domain.performance.dto.PerformanceArtistDTO;
+import hey.io.heyscheduler.domain.performance.dto.PerformanceDTO.PerformanceArtistDTO;
+import hey.io.heyscheduler.domain.performance.dto.PerformanceDTO.PerformanceTicketingDTO;
 import hey.io.heyscheduler.domain.performance.dto.PerformanceResponse;
 import hey.io.heyscheduler.domain.performance.dto.PerformanceSearch;
 import hey.io.heyscheduler.domain.performance.entity.Performance;
@@ -28,8 +29,10 @@ import hey.io.heyscheduler.domain.performance.entity.Place;
 import hey.io.heyscheduler.domain.performance.repository.PerformanceRepository;
 import hey.io.heyscheduler.domain.performance.repository.PlaceRepository;
 import hey.io.heyscheduler.domain.push.dto.PushRequest;
+import hey.io.heyscheduler.domain.push.dto.PushResponse;
 import hey.io.heyscheduler.domain.push.enums.PushType;
 import hey.io.heyscheduler.domain.push.service.PushService;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -393,10 +396,37 @@ public class PerformanceService {
 
         // 2. PUSH 알림 발송
         Map<Long, String> artists = performanceRepository.selectPerformanceArtistList(performanceIds).stream()
-            .collect(Collectors.toMap(PerformanceArtistDTO::artistId, PerformanceArtistDTO::artistName));
+            .collect(Collectors.toMap(PerformanceArtistDTO::getArtistId, PerformanceArtistDTO::getArtistName));
 
         pushService.sendMessageByTopic(PushRequest.of(PushType.BATCH_PERFORMANCE_OPEN, artists));
 
         return PerformanceResponse.of(performanceList);
+    }
+
+    /**
+     * <p>티켓팅 임박 공연 알림 발송</p>
+     *
+     * @param currentDateTime 조회 기준 시각
+     * @return 전송 성공/실패 수
+     */
+    @Transactional
+    public PushResponse modifyPerformanceTicketings(LocalDateTime currentDateTime) {
+        // 1. 예매 당일, D-1일 공연 조회
+        List<PerformanceTicketingDTO> ticketingList = performanceRepository.selectPerformanceTicketingList(currentDateTime);
+
+        // 2. PUSH 알림 발송 - 예매 당일 공연
+        Map<Long, String> ticketingOpenPerformances = ticketingList.stream()
+            .filter(ticketing -> ticketing.getTicketingType() == PushType.BATCH_TICKETING_OPEN)
+            .collect(Collectors.toMap(PerformanceTicketingDTO::getPerformanceId, PerformanceTicketingDTO::getPerformanceName));
+        PushResponse pushOpenResponse = pushService.sendMessageByTopic(PushRequest.of(PushType.BATCH_TICKETING_OPEN, ticketingOpenPerformances));
+
+        // 3. PUSH 알림 발송 - 예매 D-1일 공연
+        Map<Long, String> ticketingD1Performances = ticketingList.stream()
+            .filter(ticketing -> ticketing.getTicketingType() == PushType.BATCH_TICKETING_D1)
+            .collect(Collectors.toMap(PerformanceTicketingDTO::getPerformanceId, PerformanceTicketingDTO::getPerformanceName));
+        PushResponse pushD1Response = pushService.sendMessageByTopic(PushRequest.of(PushType.BATCH_TICKETING_D1, ticketingD1Performances));
+
+        return PushResponse.of(pushOpenResponse.successCount() + pushD1Response.successCount(),
+            pushOpenResponse.failureCount() + pushD1Response.failureCount());
     }
 }

@@ -24,7 +24,7 @@ public record PerformanceResponse(
         );
     }
 
-    public record PerformanceResult(
+    private record PerformanceResult(
         @Schema(description = "공연 ID", example = "168")
         Long performanceId,
 
@@ -32,7 +32,7 @@ public record PerformanceResponse(
         String name
     ) {
 
-        public static PerformanceResult of(Performance performance) {
+        private static PerformanceResult of(Performance performance) {
             return new PerformanceResult(
                 performance.getPerformanceId(),
                 performance.getName()

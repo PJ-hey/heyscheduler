@@ -17,14 +17,4 @@ public enum TicketStatus implements EnumMapperType {
     public String getCode() {
         return name();
     }
-
-    // 공연 상태로 티켓 상태 조회 (추후 로직 변경)
-    public static TicketStatus getByPerformanceStatus(PerformanceStatus performanceStatus) {
-        return switch (performanceStatus) {
-            case READY -> READY;
-            case ONGOING -> ONGOING;
-            case CLOSED -> CLOSED;
-            default -> null;
-        };
-    }
 }

@@ -7,9 +7,12 @@ import hey.io.heyscheduler.common.response.ApiResponse;
 import hey.io.heyscheduler.domain.performance.dto.PerformanceResponse;
 import hey.io.heyscheduler.domain.performance.dto.PerformanceSearch;
 import hey.io.heyscheduler.domain.performance.service.PerformanceService;
+import hey.io.heyscheduler.domain.push.dto.PushResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -51,5 +54,18 @@ public class PerformanceController {
     @PutMapping("/performances")
     public ApiResponse<PerformanceResponse> modifyPerformances(@RequestBody List<Long> performanceIds) {
         return ApiResponse.success(performanceService.modifyPerformances(performanceIds));
+    }
+
+    /**
+     * <p>티켓팅 임박 공연 알림 발송</p>
+     *
+     * @param ticketDateTime 조회 기준 시각
+     * @return 전송 성공/실패 수
+     */
+    @Operation(summary = "티켓팅 임박 공연 알림 발송", description = "예매 당일, D-1일 공연에 대한 알림을 발송합니다.")
+    @PostMapping("/performances/ticket")
+    public ApiResponse<PushResponse> modifyPerformanceTicketings(@RequestBody String ticketDateTime) {
+        LocalDateTime currentDateTime = LocalDateTime.parse(ticketDateTime, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        return ApiResponse.created(performanceService.modifyPerformanceTicketings(currentDateTime));
     }
 }
